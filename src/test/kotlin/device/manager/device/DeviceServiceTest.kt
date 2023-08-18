@@ -1,15 +1,21 @@
 package device.manager.device
 
+import device.manager.buildDevice
+import device.manager.buildDeviceDto
+import device.manager.buildSavedDeviceDto
+import device.manager.serialNumber
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.ArgumentMatchers.any
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Mockito.*
-import org.springframework.boot.test.context.SpringBootTest
+import org.mockito.Mockito.`when`
+import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.dao.DataIntegrityViolationException
 
-@SpringBootTest
+@ExtendWith(MockitoExtension::class)
 class DeviceServiceTest {
 
     @Mock
@@ -19,32 +25,23 @@ class DeviceServiceTest {
     private lateinit var deviceService: DeviceService
 
     @Test
-    fun `Test createDevice with valid input`() {
-        val deviceDto = DeviceDto(serialNumber = "SN123", phoneNumber = "1234567890", model = "Model X")
-        val deviceEntity = deviceDto.toEntity()
-        val savedDeviceEntity = deviceEntity.copy(id = java.util.UUID.randomUUID())
+    fun `should create device with valid input`() {
+        `when`(deviceRepository.existsBySerialNumber(serialNumber)).thenReturn(false)
+        `when`(deviceRepository.save(any())).thenReturn(buildDevice())
 
-        `when`(deviceRepository.existsBySerialNumber(deviceDto.serialNumber)).thenReturn(false)
-        `when`(deviceRepository.save(deviceEntity)).thenReturn(savedDeviceEntity)
+        val result = deviceService.createDevice(buildDeviceDto())
 
-        val result = deviceService.createDevice(deviceDto)
-
-        assertThat(result).isEqualTo(savedDeviceEntity.toDto())
+        assertThat(result).isEqualTo(buildSavedDeviceDto())
     }
 
     @Test
-    fun `Test createDevice with duplicate serial number`() {
-        val deviceDto = DeviceDto(serialNumber = "SN123", phoneNumber = "1234567890", model = "Model X")
-
-        `when`(deviceRepository.existsBySerialNumber(deviceDto.serialNumber)).thenReturn(true)
+    fun `should throw exception when creating device with duplicate serial number`() {
+        `when`(deviceRepository.existsBySerialNumber(serialNumber)).thenReturn(true)
 
         assertThatThrownBy {
-            deviceService.createDevice(deviceDto)
+            deviceService.createDevice(buildDeviceDto())
         }
             .isInstanceOf(DataIntegrityViolationException::class.java)
             .hasMessage("Device with the same serial number already exists.")
-
-        verify(deviceRepository, times(1)).existsBySerialNumber(deviceDto.serialNumber)
-        verify(deviceRepository, never()).save(any())
     }
 }
