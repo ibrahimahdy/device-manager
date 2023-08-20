@@ -38,6 +38,7 @@ Example:
 
 ### Create a User
 **POST /users**
+
 Create a new user with the following attributes:
 - firstName (String, required)
 - lastName (String, required)
@@ -56,10 +57,12 @@ Example:
 
 ### Assign a Device to a User
 **POST /users/{userId}/assign-device/{deviceId}**
+
 Assign an existing device to an existing user.
 
 ### List Users with Devices
 **GET /users/with-devices**
+
 List all users along with the devices assigned to them.
 
 ## Unit Tests
