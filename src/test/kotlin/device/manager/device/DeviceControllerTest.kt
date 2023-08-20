@@ -3,6 +3,9 @@ package device.manager.device
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import device.manager.buildDeviceDto
 import device.manager.buildSavedDeviceDto
+import device.manager.model
+import device.manager.phoneNumber
+import device.manager.serialNumber
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mockito.`when`
@@ -47,7 +50,19 @@ class DeviceControllerTest {
     }
 
     @Test
-    fun `should throw an exception when trying to create device with duplicate serial number`() {
+    fun `should return bad request for invalid user input`() {
+        val invalidDeviceDto = DeviceDto(serialNumber = "", phoneNumber = "123", model = "x")
+
+        mockMvc.perform(
+            post("/devices")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(invalidDeviceDto)),
+        )
+            .andExpect(status().isBadRequest)
+    }
+
+    @Test
+    fun `should return conflict when trying to create device with duplicate serial number`() {
         `when`(deviceService.createDevice(buildDeviceDto())).thenThrow(DataIntegrityViolationException("Device with the same serial number already exists."))
 
         val errorMessage = """{"errorCode":409,"message":{"message":"Device with the same serial number already exists."}}"""

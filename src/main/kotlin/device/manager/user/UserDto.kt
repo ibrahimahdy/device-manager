@@ -10,6 +10,7 @@ import java.util.UUID
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class UserDto(
     val id: UUID? = null,
+
     @field:NotBlank
     val firstName: String,
 
@@ -20,7 +21,8 @@ data class UserDto(
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     val birthday: LocalDate,
-    val device: DeviceDto? = null
+
+    val device: DeviceDto? = null,
 ) {
     fun toEntity() = User(firstName = firstName, lastName = lastName, address = address, birthday = birthday)
 }
