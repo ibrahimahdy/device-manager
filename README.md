@@ -79,3 +79,10 @@ JDBC URL: jdbc:h2:mem:device-manager
 Username: sa
 Password:
 ```
+
+## Assumptions
+It's assumed that:
+- model is required when creating a device
+- serialNumber is required when creating a device and is unique per device
+- firstName and lastName are required when creating a user
+- The format allowed for the birthday attribute is yyyy-MM-dd
